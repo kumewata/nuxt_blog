@@ -1,5 +1,16 @@
 const pkg = require('./package')
 
+const {getConfigForKeys} = require('./lib/config.js')
+const ctfConfig = getConfigForKeys([
+  'CTF_PERSON_ID',
+  'CTF_BLOG_ID',
+  'CTF_SPACE_ID',
+  'CTF_CDA_ACCESS_TOKEN'
+])
+
+const {createClient} = require('./plugins/contentful')
+const cdaClient = createClient(ctfConfig)
+
 module.exports = {
   mode: 'universal',
 
@@ -49,7 +60,29 @@ module.exports = {
     ** You can extend webpack config here
     */
     extend(config, ctx) {
-      
+
     }
+  },
+  env: {
+    CTF_SPACE_ID: config.CTF_SPACE_ID,
+    CTF_CDA_ACCESS_TOKEN: config.CTF_CDA_ACCESS_TOKEN,
+    CTF_PERSON_ID: config.CTF_PERSON_ID,
+    CTF_BLOG_ID: config.CTF_BLOG_ID,
+  },
+  generate: {
+    routes() {
+      return Promise.all([
+        cdaClient.getEntries({
+          content_type: config.CTF_BLOG_ID,
+        }),
+        // client.getEntries({
+        //   content_type: config.CTF_CATEGORY_ID,
+        // }),
+      ])
+        .then(([posts, categories]) => [
+          ...posts.items.map(post => `articles/${post.fields.id}`),
+          // ...categories.items.map(category => `articles/category/${category.fields.slug}`),
+        ]);
+    },
   }
 }
