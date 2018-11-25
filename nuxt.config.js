@@ -64,25 +64,32 @@ module.exports = {
     }
   },
   env: {
-    CTF_SPACE_ID: config.CTF_SPACE_ID,
-    CTF_CDA_ACCESS_TOKEN: config.CTF_CDA_ACCESS_TOKEN,
-    CTF_PERSON_ID: config.CTF_PERSON_ID,
-    CTF_BLOG_ID: config.CTF_BLOG_ID,
+    CTF_SPACE_ID: ctfConfig.CTF_SPACE_ID,
+    CTF_CDA_ACCESS_TOKEN: ctfConfig.CTF_CDA_ACCESS_TOKEN,
+    CTF_PERSON_ID: ctfConfig.CTF_PERSON_ID,
+    CTF_BLOG_ID: ctfConfig.CTF_BLOG_ID,
   },
   generate: {
+    // routes() {
+    //   return Promise.all([
+    //     cdaClient.getEntries({
+    //       content_type: config.CTF_BLOG_ID,
+    //     }),
+    //     // client.getEntries({
+    //     //   content_type: config.CTF_CATEGORY_ID,
+    //     // }),
+    //   ])
+    //     .then(([posts, categories]) => [
+    //       ...posts.items.map(post => `articles/${post.fields.id}`),
+    //       // ...categories.items.map(category => `articles/category/${category.fields.slug}`),
+    //     ]);
+    // },
     routes() {
-      return Promise.all([
-        cdaClient.getEntries({
-          content_type: config.CTF_BLOG_ID,
-        }),
-        // client.getEntries({
-        //   content_type: config.CTF_CATEGORY_ID,
-        // }),
-      ])
-        .then(([posts, categories]) => [
-          ...posts.items.map(post => `articles/${post.fields.id}`),
-          // ...categories.items.map(category => `articles/category/${category.fields.slug}`),
-        ]);
-    },
+      return cdaClient
+        .getEntries(ctfConfig.CTF_BLOG_POST_TYPE_ID)
+        .then(posts => {
+          return [...posts.items.map(post => `articles/${post.fields.id}`)]
+        })
+    }
   }
 }
